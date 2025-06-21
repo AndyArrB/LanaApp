@@ -19,3 +19,13 @@ class Usuario(SQLModel, table=True):
     nombre: str
     email: str = Field(unique=True, index=True)
     hashed_password: str
+
+
+# TABLS DE PRESUPUESTOS
+class Presupuesto(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    usuario_id: int
+    categoria: str
+    monto_maximo: float
+    mes: int
+    anio: int
