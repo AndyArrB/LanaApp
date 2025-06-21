@@ -10,6 +10,7 @@ router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
 class UsuarioRegistro(BaseModel):
     nombre: str
+    apellido: str
     email: str
     password: str
     
@@ -26,9 +27,10 @@ def registrar_usuario(data: UsuarioRegistro, session: Session = Depends(get_sess
         raise HTTPException(status_code=400, detail="El email ya está registrado")
     nuevo = Usuario(
         nombre=data.nombre,
+        apellido=data.apellido,
         email=data.email,
         hashed_password=encriptar_contrasena(data.password)
-    )
+        )
     session.add(nuevo)
     session.commit()
     session.refresh(nuevo)
@@ -43,3 +45,21 @@ def login(data: UsuarioLogin, session: Session = Depends(get_session)):
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
     token = crear_token({"sub": str(usuario.id)})
     return {"access_token": token, "token_type": "bearer"}
+
+
+#PARA VER QUE USUARIOS HAY EN LA BD
+@router.get("/usuarios/", response_model=list[Usuario])
+def listar_usuarios(session: Session = Depends(get_session)):
+    usuarios = session.exec(select(Usuario)).all()
+    return usuarios
+
+
+#PARA ELIMINAR UN USUARIO EXISTENTE
+@router.delete("/usuarios/{usuario_id}")
+def eliminar_usuario(usuario_id: int, session: Session = Depends(get_session)):
+    usuario = session.get(Usuario, usuario_id)
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    session.delete(usuario)
+    session.commit()
+    return {"mensaje": "Usuario eliminado exitosamente"}

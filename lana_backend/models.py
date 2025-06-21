@@ -17,6 +17,7 @@ class Transaccion(SQLModel, table=True):
 class Usuario(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     nombre: str
+    apellido: str
     email: str = Field(unique=True, index=True)
     hashed_password: str
 

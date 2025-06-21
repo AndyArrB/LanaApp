@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
-from models import Transaccion
-from database import get_session, Presupuesto
+from models import Transaccion, Usuario, Presupuesto
+from database import get_session
 from typing import List
 from sqlalchemy.sql import func
+
 
 router = APIRouter(prefix="/transacciones", tags=["Transacciones"])
 
@@ -46,6 +47,7 @@ def crear_transaccion(transaccion: Transaccion, session: Session = Depends(get_s
         if suma > presupuesto.monto_maximo:
             print("Presupuesto excedido!")
             print(f"Total gastado: {suma}, Límite: {presupuesto.monto_maximo}")
+            
     
     return transaccion
 
