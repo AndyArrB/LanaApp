@@ -1,0 +1,45 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlmodel import Session, select
+from models import Usuario
+from database import get_session
+from auth import encriptar_contrasena, verificar_contrasena, crear_token, verificar_token
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
+
+
+class UsuarioRegistro(BaseModel):
+    nombre: str
+    email: str
+    password: str
+    
+class UsuarioLogin(BaseModel):
+    email: str
+    password: str
+    
+
+# PARA REGISTRAR UN NUEVO USUARIO
+@router.post("/registro")
+def registrar_usuario(data: UsuarioRegistro, session: Session = Depends(get_session)):
+    existe = session.exec(select(Usuario).where(Usuario.email == data.email)).first()
+    if existe:
+        raise HTTPException(status_code=400, detail="El email ya está registrado")
+    nuevo = Usuario(
+        nombre=data.nombre,
+        email=data.email,
+        hashed_password=encriptar_contrasena(data.password)
+    )
+    session.add(nuevo)
+    session.commit()
+    session.refresh(nuevo)
+    return {"msg": "Usuario registrado correctamente", "id": nuevo.id}
+
+
+#PARA INICIAR SESIÓN (OSEA CUANDO YA TENGO CUENTA)
+@router.post("/login")
+def login(data: UsuarioLogin, session: Session = Depends(get_session)):
+    usuario = session.exec(select(Usuario).where(Usuario.email == data.email)).first()
+    if not usuario or not verificar_contrasena(data.password, usuario.hashed_password):
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
+    token = crear_token({"sub": str(usuario.id)})
+    return {"access_token": token, "token_type": "bearer"}
