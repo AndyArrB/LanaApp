@@ -30,3 +30,14 @@ class Presupuesto(SQLModel, table=True):
     monto_maximo: float
     mes: int
     anio: int
+    
+
+#TABLA DE PAGOS FIJOS
+class PagoFijo(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    description: str
+    monto: float
+    categoria: str
+    frecuencia: str
+    proxima_fecha: date
+    usuario_id: int

@@ -3,19 +3,21 @@ from sqlmodel import Session, select
 from models import Usuario
 from database import get_session
 from auth import encriptar_contrasena, verificar_contrasena, crear_token, verificar_token
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, constr
+from typing import Annotated
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
+NombreStr = Annotated[str, constr(min_length=3, strip_whitespace=True)]
 
 class UsuarioRegistro(BaseModel):
-    nombre: str
-    apellido: str
-    email: str
-    password: str
+    nombre: NombreStr
+    apellido: NombreStr
+    email: EmailStr
+    password: Annotated[str, constr(min_length=8)]
     
 class UsuarioLogin(BaseModel):
-    email: str
+    email: EmailStr
     password: str
     
 

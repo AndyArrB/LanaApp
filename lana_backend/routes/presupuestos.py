@@ -3,13 +3,14 @@ from sqlmodel import Session, select
 from typing import List
 from models import Presupuesto
 from database import get_session
+from schemas import PresupuestoCreate, PresupuestoUpdate
 
 router = APIRouter(prefix="/presupuestos", tags=["Presupuestos"])
 
 
 # PARA CREAR UN NUEVO PRESUPUESTO
 @router.post("/", response_model=Presupuesto)
-def crear_presupuesto(presupuesto: Presupuesto, session: Session = Depends(get_session)):
+def crear_presupuesto(presupuesto: PresupuestoCreate, session: Session = Depends(get_session)):
     session.add(presupuesto)
     session.commit()
     session.refresh(presupuesto)
@@ -33,11 +34,11 @@ def obtener_presupuesto(presupuesto_id: int, session: Session = Depends(get_sess
 
 # PARA ACTUALIZAR UN PRESUPUESTO EXISTENTE
 @router.put("/{presupuesto_id}", response_model=Presupuesto)
-def actualizar_presupuesto(presupuesto_id: int, data: Presupuesto, session: Session = Depends(get_session)):
+def actualizar_presupuesto(presupuesto_id: int, data: PresupuestoUpdate, session: Session = Depends(get_session)):
     presupuesto = session.get(Presupuesto, presupuesto_id)
     if not presupuesto:
         raise HTTPException(status_code=404, detail="Presupuesto no encontrado")
-    for key, value in data.dict(exclude_unset=True).items():
+    for key, value in data.model_dump(exclude_unset=True).items():
         setattr(presupuesto, key, value)
     session.commit()
     return presupuesto
