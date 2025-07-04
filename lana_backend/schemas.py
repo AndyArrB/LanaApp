@@ -114,3 +114,23 @@ class PagoFijoUpdate(PagoFijoBase):
     categoria: Optional[str] = None
     frecuencia: Optional[str] = None
     proxima_fecha: Optional[date] = None
+    
+    
+# PARA CATEGORIAS
+class CategoriaBase(BaseModel):
+    nombre: str
+
+class CategoriaCreate(CategoriaBase):
+    pass
+
+class CategoriaRead(CategoriaBase):
+    id: int
+
+class CategoriaUpdate(CategoriaBase):
+    id: Optional[int] = None
+
+    @field_validator("id")
+    def validar_id(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError("El ID debe ser un número positivo")
+        return v

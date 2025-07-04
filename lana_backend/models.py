@@ -6,7 +6,7 @@ from datetime import date
 class Transaccion(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     monto: float
-    categoria: str
+    categoria_id: int
     fecha: date
     descripcion: Optional[str]
     tipo: str #Esto es para saber si será un ingreso o un egreso
@@ -26,7 +26,7 @@ class Usuario(SQLModel, table=True):
 class Presupuesto(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     usuario_id: int
-    categoria: str
+    categoria_id: int
     monto_maximo: float
     mes: int
     anio: int
@@ -37,7 +37,13 @@ class PagoFijo(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     description: str
     monto: float
-    categoria: str
+    categoria_id: int
     frecuencia: str
     proxima_fecha: date
     usuario_id: int
+    
+
+#TABLA DE CATEGORIAS
+class Categoria(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    nombre: str = Field(index=True, unique=True)

@@ -56,6 +56,15 @@ def listar_usuarios(session: Session = Depends(get_session)):
     return usuarios
 
 
+# PARA BUSCAR UN USUARIO EN EESPECÍFICO
+@router.get("/usuarios/{usuario_id}", response_model=Usuario)
+def obtener_usuario(usuario_id: int, session: Session = Depends(get_session)):
+    usuario = session.get(Usuario, usuario_id)
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return usuario
+
+
 #PARA ELIMINAR UN USUARIO EXISTENTE
 @router.delete("/usuarios/{usuario_id}")
 def eliminar_usuario(usuario_id: int, session: Session = Depends(get_session)):
