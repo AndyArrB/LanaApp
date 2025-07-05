@@ -51,31 +51,29 @@ Este proyecto forma parte de una entrega académica para la materia de Programac
    ```terminal
    http://localhost:8000/docs
 
-## 📁 Estructura del proyecto
-lana_backend/
-│
-├── main.py                  # Punto de entrada de la app FastAPI
-├── database.py              # Conexión a la base de datos
-├── models.py                # Tablas de la base de datos con SQLModel
-├── schemas.py               # Validaciones con Pydantic
-├── auth.py                  # Funciones de autenticación (JWT, hashing)
-├── routes/                  # Endpoints organizados por funcionalidad
-│   ├── usuarios.py
-│   ├── transacciones.py
-│   ├── presupuestos.py
-│   ├── pagos_fijos.py
-│   ├── categorias.py
-│   └── graficas.py
-└── requirements.txt
+---
 
 ## 📌 Notas adicionales
 - El proyecto ya está listo para conectarse a un Front de React Native
-- El proyecto fue desarrollado como parte del noveno cuatrimestre de Ingeniería en Sistemas.
 - En caso de no poder ejecutar alguna parte del código, buscar a Andy.
 
-## 🧑‍💻 Autores
-- Arredondo Balderas Andrea
-- Cruz Etanislao Jhadiel
-- Jimémnez Hernández Veronica Alejandra
-- Romo Zárraga Joaquin Alejandro
-   
+---
+
+## 📁 Estructura del proyecto
+   ```bash
+   lana_backend/
+   │
+   ├── main.py                  # Punto de entrada de la app FastAPI
+   ├── database.py              # Conexión a la base de datos
+   ├── models.py                # Tablas de la base de datos con SQLModel
+   ├── schemas.py               # Validaciones con Pydantic
+   ├── auth.py                  # Funciones de autenticación (JWT, hashing)
+   ├── routes/                  # Endpoints organizados por funcionalidad
+   │   ├── usuarios.py
+   │   ├── transacciones.py
+   │   ├── presupuestos.py
+   │   ├── pagos_fijos.py
+   │   ├── categorias.py
+   │   └── graficas.py
+   └── requirements.txt
+
