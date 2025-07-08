@@ -4,6 +4,8 @@ from database import get_session
 from models import PagoFijo
 from schemas import PagoFijoCreate, PagoFijoUpdate
 from typing import List
+from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
 
 router = APIRouter(prefix="/pagos-fijos", tags=["Pagos Fijos"])
 
@@ -11,7 +13,18 @@ router = APIRouter(prefix="/pagos-fijos", tags=["Pagos Fijos"])
 #RUTA PARA CREAR UN NUEVO PAGO FIJO
 @router.post("/", response_model=PagoFijo)
 def crear_pago_fijo(data: PagoFijoCreate, session: Session = Depends(get_session)):
-    nuevo = PagoFijo(**data.model_dump())
+    datos = data.model_dump()
+
+    # Se determina en automático la fecha del pago
+    hoy = date.today()
+    if not datos.get("proxima_fecha"):
+        if datos["frecuencia"] == "mensual":
+            datos["proxima_fecha"] = hoy + relativedelta(months=1)
+        elif datos["frecuencia"] == "quincenal":
+            datos["proxima_fecha"] = hoy + timedelta(days=14)
+
+    
+    nuevo = PagoFijo(**datos)
     session.add(nuevo)
     session.commit()
     session.refresh(nuevo)
@@ -53,4 +66,4 @@ def eliminar_pago_fijo(pago_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Pago fijo no encontrado")
     session.delete(pago)
     session.commit()
-    return {"ok": True}
+    return {"msg": "Pago fijo eliminado correctamente"}

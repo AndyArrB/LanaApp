@@ -5,17 +5,12 @@ from typing import Optional
 #VALIDACIONES PARA TRANSACCION BASICAS
 class TransaccionBase(BaseModel):
     monto: Optional[float] = Field(None, gt=0, description="El monto debe ser mayor a cero")
-    categoria: Optional[str]
+    categoria_id: Optional[int]
     fecha: Optional[date]
     descripcion: Optional[str] = None
     tipo: Optional[str]
     usuario_id: Optional[int]
     
-    @field_validator("categoria")
-    def validar_categoria(cls,v):
-        if v is not None and len(v.strip()) < 3:
-            raise ValueError("La categoría debe tener al menos 3 caracteres")
-        return v
     
     @field_validator("fecha")
     def validar_fecha(cls, v):
@@ -33,7 +28,7 @@ class TransaccionBase(BaseModel):
 #MODELO EN TRANSACCIONES NUEVAS
 class TransaccionCreate(TransaccionBase):
     monto: float
-    categoria: str
+    categoria_id: int
     fecha: date
     tipo:str
     usuario_id: int
@@ -47,16 +42,11 @@ class TransaccionUpdate(TransaccionBase):
 #VALIDACIONES PARA LOS PRESUPUESTOS
 class PresupuestoBase(BaseModel):
     usuario_id: Optional[int]
-    categoria: Optional[str]
+    categoria_id: Optional[int]
     monto_maximo: Optional[float] = Field(None, gt=0, description="El monto debe ser mayo a cero")
     mes: Optional[int] = Field(None, ge=1, le=12, description="Meses de Enero (1) a Diciembre (12)")
     anio: Optional[int] = Field(None, ge=2025, le=2025, description="Solo para el año en curso")
     
-    @field_validator("categoria")
-    def validar_categoria(cls, v):
-        if v is not None and len(v.strip()) < 3:
-            raise ValueError("La categoría debe tener al menos 3 caracteres")
-        return v.strip()
     
     @field_validator("anio")
     def validar_anio(cls, v):
@@ -68,10 +58,10 @@ class PresupuestoBase(BaseModel):
 #MODELO CON NUEVOS PRESUPUESTOS
 class PresupuestoCreate(PresupuestoBase):
     usuario_id: int
-    categoria: str
+    categoria_id: int
     monto_maximo: float
-    mes: int
-    anio: int
+    mes: Optional[int] = None
+    anio: Optional[int] = None
     
 #PARA ACTUALIZAR PRESUPUESTOS
 class PresupuestoUpdate(PresupuestoBase):
@@ -82,7 +72,7 @@ class PresupuestoUpdate(PresupuestoBase):
 class PagoFijoBase(BaseModel):
     descripcion: str
     monto: float
-    categoria: str
+    categoria_id: int
     frecuencia: str  # osea si será mensual o quincenal
     proxima_fecha: date
     usuario_id: int
@@ -111,7 +101,6 @@ class PagoFijoCreate(PagoFijoBase):
 class PagoFijoUpdate(PagoFijoBase):
     descripcion: Optional[str] = None
     monto: Optional[float] = None
-    categoria: Optional[str] = None
     frecuencia: Optional[str] = None
     proxima_fecha: Optional[date] = None
     
@@ -119,6 +108,7 @@ class PagoFijoUpdate(PagoFijoBase):
 # PARA CATEGORIAS
 class CategoriaBase(BaseModel):
     nombre: str
+    usuario_id: int
 
 class CategoriaCreate(CategoriaBase):
     pass
@@ -127,10 +117,11 @@ class CategoriaRead(CategoriaBase):
     id: int
 
 class CategoriaUpdate(CategoriaBase):
-    id: Optional[int] = None
-
-    @field_validator("id")
-    def validar_id(cls, v):
-        if v is not None and v <= 0:
-            raise ValueError("El ID debe ser un número positivo")
-        return v
+    nombre: Optional[str] = None
+    usuario_id: Optional[int] = None
+    
+    @field_validator("nombre")
+    def validar_nombre(cls, v):
+        if v is not None and not v.strip():
+            raise ValueError("El nombre no puede estar vacío")
+        return v.strip() if v else v

@@ -35,7 +35,7 @@ class Presupuesto(SQLModel, table=True):
 #TABLA DE PAGOS FIJOS
 class PagoFijo(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    description: str
+    descripcion: str
     monto: float
     categoria_id: int
     frecuencia: str
@@ -46,4 +46,5 @@ class PagoFijo(SQLModel, table=True):
 #TABLA DE CATEGORIAS
 class Categoria(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    nombre: str = Field(index=True, unique=True)
+    nombre: str = Field(index=True) 
+    usuario_id: int

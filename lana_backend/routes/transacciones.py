@@ -14,20 +14,19 @@ router = APIRouter(prefix="/transacciones", tags=["Transacciones"])
 #PARA CREAR UNA NUEVA TRANSACCIÓN
 @router.post("/", response_model=Transaccion)
 def crear_transaccion(transaccion: TransaccionCreate, session: Session = Depends(get_session)):
-    
-    session.add(transaccion)
+    nueva_transaccion = Transaccion(**transaccion.model_dump())
+    session.add(nueva_transaccion)
     session.commit()
-    session.refresh(transaccion)
+    session.refresh(nueva_transaccion)
 
+    mes = nueva_transaccion.fecha.month
+    anio = nueva_transaccion.fecha.year
 
-    mes = transaccion.fecha.month
-    anio = transaccion.fecha.year
-
-    # busca si hay coincidencia con algun presupuesto
+    # busca si hay coincidencia con algún presupuesto
     presupuesto = session.exec(
         select(Presupuesto).where(
-            Presupuesto.usuario_id == transaccion.usuario_id,
-            Presupuesto.categoria == transaccion.categoria,
+            Presupuesto.usuario_id == nueva_transaccion.usuario_id,
+            Presupuesto.categoria_id == nueva_transaccion.categoria_id,
             Presupuesto.mes == mes,
             Presupuesto.anio == anio
         )
@@ -37,8 +36,8 @@ def crear_transaccion(transaccion: TransaccionCreate, session: Session = Depends
         # Buscar transacciones de ese mes y categoría
         transacciones_mes = session.exec(
             select(Transaccion).where(
-                Transaccion.usuario_id == transaccion.usuario_id,
-                Transaccion.categoria == transaccion.categoria,
+                Transaccion.usuario_id == nueva_transaccion.usuario_id,
+                Transaccion.categoria_id == nueva_transaccion.categoria_id,
                 func.strftime("%m", Transaccion.fecha) == f"{mes:02}",
                 func.strftime("%Y", Transaccion.fecha) == str(anio)
             )
@@ -47,11 +46,12 @@ def crear_transaccion(transaccion: TransaccionCreate, session: Session = Depends
         suma = sum(t.monto for t in transacciones_mes)
         # valida si se está excediendo o no el presupuesto
         if suma > presupuesto.monto_maximo:
-            print("Presupuesto excedido!")
-            print(f"Total gastado: {suma}, Límite: {presupuesto.monto_maximo}")
-            
-    
-    return transaccion
+            aviso = f"¡Presupuesto excedido! Total gastado: {suma}, Límite: {presupuesto.monto_maximo}"
+
+    return {
+        "transaccion": nueva_transaccion,
+        "aviso": aviso
+    }
 
 
 #PARA LISTAR LAS TRANSACCIONES
@@ -89,4 +89,4 @@ def eliminar_transaccion(transaccion_id: int, session: Session = Depends(get_ses
         raise HTTPException(status_code=404, detail="Transacción no encontrada")
     session.delete(transaccion)
     session.commit()
-    return {"ok": True}
+    return {"msg": "Transacción eliminada correctamente"}

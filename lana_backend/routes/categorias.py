@@ -4,23 +4,35 @@ from database import get_session
 from schemas import CategoriaCreate, CategoriaRead
 from models import Categoria
 from typing import List
+from sqlalchemy import func
 
 router = APIRouter(prefix="/categorias", tags=["Categorías"])
 
 
-#RUTA PARA CREAR CATEGORIA NUEVA
+# RUTA PARA CREAR CATEGORIA NUEVA
 @router.post("/", response_model=CategoriaRead)
 def crear_categoria(categoria: CategoriaCreate, db: Session = Depends(get_session)):
-    existente = db.exec(select(Categoria).where(Categoria.nombre == categoria.nombre)).first()
-    if existente:
-        raise HTTPException(status_code=400, detail="La categoría ya existe")
+    # Validar que no exista una categoría con ese nombre para el mismo usuario (sin distinguir mayúsculas/minúsculas)
+    existente = db.exec(
+        select(Categoria)
+        .where(
+            func.lower(Categoria.nombre) == categoria.nombre.lower(),
+            Categoria.usuario_id == categoria.usuario_id
+        )
+    ).first()
     
-    nueva_categoria = Categoria(nombre=categoria.nombre)
+    if existente:
+        raise HTTPException(status_code=400, detail="La categoría ya existe para este usuario")
+
+    # Crear y guardar
+    nueva_categoria = Categoria(
+        nombre=categoria.nombre.strip(),
+        usuario_id=categoria.usuario_id
+    )
     db.add(nueva_categoria)
     db.commit()
     db.refresh(nueva_categoria)
     return nueva_categoria
-
 
 #RUTA PARA LISTAR LAS CATEGORIAS EXISTENTES
 @router.get("/", response_model=List[CategoriaRead])
